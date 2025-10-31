@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.DS_Store
+.git
+.vscode
+*.local
+coverage
+src/input.csv
+output.csv
+*.env

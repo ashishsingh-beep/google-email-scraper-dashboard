@@ -213,47 +213,36 @@ Access your dashboard at 👉 [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🧱 Deployment
+## 🐳 Docker
 
-### Backend
+Production-like run with Docker is included. This uses a Playwright base image so Chromium and dependencies are preinstalled.
 
-Use **PM2** to keep your backend persistent:
-
-```bash
-pm2 start backend/index.js --name scraper-api
-```
-
-### Frontend
-
-Deploy your Vite build with **Vercel**, **Netlify**, or serve it from Express:
+### One-time build and run
 
 ```bash
-app.use(express.static('../frontend/dist'))
+docker compose up --build
 ```
 
-Make sure to update environment variables for production.
+This will start:
+- Backend on http://localhost:5000
+- Frontend on http://localhost:5173 (served by Nginx)
 
----
+Notes:
+- The frontend talks to the backend at http://localhost:5000 (hardcoded in the UI). We map 5173:80 so the origin stays http://localhost:5173 and matches Socket.IO CORS defaults.
+- Backend reads secrets from backend/.env; edit that file before running if you use Supabase or NopeCHA.
+- You can override concurrency defaults via compose env vars BROWSERS and TABS_PER_BROWSER or from the UI.
 
-## 🪄 Optional: Docker Setup
+### Useful compose commands
 
 ```bash
-docker-compose up --build
-```
+# Rebuild images after code changes
+docker compose build
 
-Example configuration:
+# Start in detached mode
+docker compose up -d
 
-```yaml
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
-    env_file: .env
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
+# Stop and remove
+docker compose down
 ```
 
 ---

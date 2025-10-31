@@ -209,6 +209,17 @@ app.get('/status', (_req, res) => {
   });
 });
 
+// Download output.csv
+app.get('/download-output', (req, res) => {
+  const outputPath = path.join(__dirname, 'output.csv');
+  if (!fs.existsSync(outputPath)) {
+    return res.status(404).json({ ok: false, error: 'output.csv not found' });
+  }
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="output.csv"');
+  fs.createReadStream(outputPath).pipe(res);
+});
+
 server.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);
 });

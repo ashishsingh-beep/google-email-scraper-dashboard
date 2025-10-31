@@ -79,7 +79,7 @@ export default function App() {
     >
       {/* Header */}
       <div className="flex justify-between items-center mb-10 fade-in">
-        <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-transparent bg-clip-text animate-gradient-x">
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 text-transparent bg-clip-text animate-gradient-x">
           Google Email Scraper Dashboard
         </h1>
 
@@ -114,6 +114,9 @@ export default function App() {
           >
             Upload
           </button>
+              <a href="http://localhost:5000/download-output" style={{ marginLeft: 8 }}>
+                <button type="button">Download output.csv</button>
+              </a>
         </div>
       </div>
 
@@ -192,7 +195,7 @@ export default function App() {
         <label className="block text-sm font-medium mb-2">Progress</label>
         <div className="relative w-full bg-gray-300 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
           <div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 animate-progressMove"
+                className="absolute inset-0 bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 animate-progressMove"
             style={{
               width: `${(progress.completed / progress.total) * 100}%`,
             }}
