@@ -229,8 +229,8 @@ This will start:
 
 Notes:
 - The frontend talks to the backend at http://localhost:5000 (hardcoded in the UI). We map 5173:80 so the origin stays http://localhost:5173 and matches Socket.IO CORS defaults.
-- Backend reads secrets from backend/.env; edit that file before running if you use Supabase or NopeCHA.
-- You can override concurrency defaults via compose env vars BROWSERS and TABS_PER_BROWSER or from the UI.
+- Backend reads secrets from backend/.env and they are baked into the image at build time. Edit `backend/.env` before building if you use Supabase or NopeCHA.
+- You can override concurrency defaults from the UI. Compose env vars are optional.
 
 ### Useful compose commands
 
@@ -243,6 +243,26 @@ docker compose up -d
 
 # Stop and remove
 docker compose down
+
+### Publish to Docker Hub
+
+Two ways:
+
+1) With GitHub Actions (easiest, automated)
+     - Create two Docker Hub repositories (public is fine):
+         - ges-backend
+         - ges-frontend
+     - In your GitHub repo settings → Secrets and variables → Actions, add:
+         - DOCKERHUB_USERNAME: your Docker Hub username
+         - DOCKERHUB_TOKEN: a Docker Hub access token (Account Settings → Security → New Access Token)
+     - Push to main or trigger manually: Actions → “Publish Docker images” → Run workflow
+         - Images pushed to:
+             - docker.io/<username>/ges-backend:latest
+             - docker.io/<username>/ges-frontend:latest
+
+2) Manually from your machine (PowerShell)
+
+```powershell
 ```
 
 ---

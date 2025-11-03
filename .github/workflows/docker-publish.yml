@@ -1,0 +1,79 @@
+name: Publish Docker images
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'backend/Dockerfile'
+      - 'frontend/Dockerfile'
+      - '.github/workflows/docker-publish.yml'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional image tag (defaults to latest + commit sha)'
+        required: false
+        default: ''
+
+env:
+  REGISTRY: docker.io
+  IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/ges-backend
+  IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/ges-frontend
+
+jobs:
+  build-and-push:
+    name: Build and push images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute extra tag
+        id: tags
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "EXTRA_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          fi
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE_BACKEND }}:latest
+            ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+            ${{ env.IMAGE_BACKEND }}:${{ env.EXTRA_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE_FRONTEND }}:latest
+            ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+            ${{ env.IMAGE_FRONTEND }}:${{ env.EXTRA_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}

@@ -5,6 +5,7 @@ npm-debug.log
 .vscode
 *.local
 coverage
-src/input.csv
+# Keep default input.csv in the image so scraper can run without upload
+# (do NOT ignore src/input.csv)
 output.csv
-*.env
+# Keep .env included so env vars are baked into the image

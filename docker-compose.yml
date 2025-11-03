@@ -1,25 +1,11 @@
-version: "3.9"
-
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: ges-backend
-    env_file:
-      - ./backend/.env
-    environment:
-      - PORT=5000
-      - HEADLESS=false
-      # Optional defaults
-      # - BROWSERS=2
-      # - TABS_PER_BROWSER=2
     ports:
       - "5000:5000"
-    volumes:
-      # ✅ Persist input/output CSVs on your local machine
-      - ./backend/src/input.csv:/app/src/input.csv
-      - ./backend/output.csv:/app/output.csv
     networks:
       - ges-net
     restart: unless-stopped
