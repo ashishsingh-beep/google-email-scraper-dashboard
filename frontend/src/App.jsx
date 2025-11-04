@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
+import SupabaseDashboard from "./components/SupabaseDashboard.jsx";
 
 const socket = io("http://localhost:5000/logs", {
   transports: ["websocket"],
@@ -8,6 +9,7 @@ const socket = io("http://localhost:5000/logs", {
 });
 
 export default function App() {
+  const [tab, setTab] = useState("scraper");
   const [browsers, setBrowsers] = useState(2);
   const [tabs, setTabs] = useState(2);
   const [logs, setLogs] = useState([]);
@@ -73,8 +75,8 @@ export default function App() {
     <div
       className={`min-h-screen p-6 transition-colors duration-500 ${
         darkMode
-          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
-          : "bg-gradient-to-br from-gray-100 via-white to-gray-100 text-gray-900"
+          ? "bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
+          : "bg-linear-to-br from-gray-100 via-white to-gray-100 text-gray-900"
       }`}
     >
       {/* Header */}
@@ -92,146 +94,158 @@ export default function App() {
         </button>
       </div>
 
-      {/* Upload Section */}
-      <div
-        className={`p-5 rounded-xl border card-hover fade-in mb-6 ${
-          darkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <label className="block mb-2 font-semibold">Upload CSV File</label>
-        <div className="flex items-center gap-3">
-          <input
-            type="file"
-            accept=".csv"
-            onChange={(e) => setCsvFile(e.target.files[0])}
-            className="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-          />
-          <button
-            onClick={handleUpload}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
-          >
-            Upload
-          </button>
-              <a href="http://localhost:5000/download-output" style={{ marginLeft: 8 }}>
-                <button type="button">Download output.csv</button>
-              </a>
-        </div>
+      {/* Tabs */}
+      <div className={`mb-6 flex gap-2`}>
+        <button onClick={() => setTab('scraper')} className={`px-3 py-2 rounded ${tab==='scraper' ? 'bg-blue-600 text-white' : (darkMode ? 'bg-gray-800 border border-gray-700 text-gray-200' : 'bg-white border border-gray-300 text-gray-800')}`}>Scraper</button>
+        <button onClick={() => setTab('dashboard')} className={`px-3 py-2 rounded ${tab==='dashboard' ? 'bg-blue-600 text-white' : (darkMode ? 'bg-gray-800 border border-gray-700 text-gray-200' : 'bg-white border border-gray-300 text-gray-800')}`}>Dashboard</button>
       </div>
 
-      {/* Control Panel */}
-      <div
-        className={`p-5 rounded-xl border card-hover fade-in mb-6 grid md:grid-cols-3 gap-4 ${
-          darkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <div>
-          <label className="block text-sm font-medium mb-1">BROWSERS</label>
-          <input
-            type="number"
-            value={browsers}
-            onChange={(e) => setBrowsers(e.target.value)}
-            className={`w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              darkMode
-                ? "bg-gray-700 border-gray-600 text-gray-100"
-                : "bg-gray-50 border-gray-300 text-gray-900"
-            }`}
-            min="1"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            TABS PER BROWSER
-          </label>
-          <input
-            type="number"
-            value={tabs}
-            onChange={(e) => setTabs(e.target.value)}
-            className={`w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              darkMode
-                ? "bg-gray-700 border-gray-600 text-gray-100"
-                : "bg-gray-50 border-gray-300 text-gray-900"
-            }`}
-            min="1"
-          />
-        </div>
-        <div className="flex items-end gap-3">
-          <button
-            onClick={handleStart}
-            disabled={isRunning}
-            className={`flex-1 py-2 rounded-lg text-white transition-all ${
-              isRunning
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 glow"
-            }`}
-          >
-            Start
-          </button>
-          <button
-            onClick={handleStop}
-            disabled={!isRunning}
-            className={`flex-1 py-2 rounded-lg text-white transition-all ${
-              !isRunning
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-red-600 hover:bg-red-700 glow"
-            }`}
-          >
-            Stop
-          </button>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div
-        className={`p-5 rounded-xl border card-hover fade-in mb-6 ${
-          darkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <label className="block text-sm font-medium mb-2">Progress</label>
-        <div className="relative w-full bg-gray-300 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+      {tab === 'scraper' ? (
+        <>
+          {/* Upload Section */}
           <div
-                className="absolute inset-0 bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 animate-progressMove"
-            style={{
-              width: `${(progress.completed / progress.total) * 100}%`,
-            }}
-          ></div>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          {progress.completed}/{progress.total} completed
-        </p>
-      </div>
-
-      {/* Logs */}
-      <div
-        className={`p-5 rounded-xl border card-hover fade-in h-80 overflow-y-auto ${
-          darkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <h2 className="font-semibold mb-2 text-blue-600 dark:text-blue-400">
-          Logs
-        </h2>
-        <div className="text-sm space-y-1 font-mono">
-          {logs.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">No logs yet...</p>
-          ) : (
-            logs.map((log, i) => (
-              <div
-                key={i}
-                className="text-gray-700 dark:text-gray-300 fade-in"
+            className={`p-5 rounded-xl border card-hover fade-in mb-6 ${
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+          >
+            <label className="block mb-2 font-semibold">Upload CSV File</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => setCsvFile(e.target.files[0])}
+                className="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              />
+              <button
+                onClick={handleUpload}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
               >
-                {log}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+                Upload
+              </button>
+                  <a href="http://localhost:5000/download-output" style={{ marginLeft: 8 }}>
+                    <button type="button">Download output.csv</button>
+                  </a>
+            </div>
+          </div>
+
+          {/* Control Panel */}
+          <div
+            className={`p-5 rounded-xl border card-hover fade-in mb-6 grid md:grid-cols-3 gap-4 ${
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+          >
+            <div>
+              <label className="block text-sm font-medium mb-1">BROWSERS</label>
+              <input
+                type="number"
+                value={browsers}
+                onChange={(e) => setBrowsers(e.target.value)}
+                className={`w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100"
+                    : "bg-gray-50 border-gray-300 text-gray-900"
+                }`}
+                min="1"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                TABS PER BROWSER
+              </label>
+              <input
+                type="number"
+                value={tabs}
+                onChange={(e) => setTabs(e.target.value)}
+                className={`w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100"
+                    : "bg-gray-50 border-gray-300 text-gray-900"
+                }`}
+                min="1"
+              />
+            </div>
+            <div className="flex items-end gap-3">
+              <button
+                onClick={handleStart}
+                disabled={isRunning}
+                className={`flex-1 py-2 rounded-lg text-white transition-all ${
+                  isRunning
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 glow"
+                }`}
+              >
+                Start
+              </button>
+              <button
+                onClick={handleStop}
+                disabled={!isRunning}
+                className={`flex-1 py-2 rounded-lg text-white transition-all ${
+                  !isRunning
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 glow"
+                }`}
+              >
+                Stop
+              </button>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div
+            className={`p-5 rounded-xl border card-hover fade-in mb-6 ${
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+          >
+            <label className="block text-sm font-medium mb-2">Progress</label>
+            <div className="relative w-full bg-gray-300 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+              <div
+                    className="absolute inset-0 bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 animate-progressMove"
+                style={{
+                  width: `${(progress.completed / progress.total) * 100}%`,
+                }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              {progress.completed}/{progress.total} completed
+            </p>
+          </div>
+
+          {/* Logs */}
+          <div
+            className={`p-5 rounded-xl border card-hover fade-in h-80 overflow-y-auto ${
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+          >
+            <h2 className="font-semibold mb-2 text-blue-600 dark:text-blue-400">
+              Logs
+            </h2>
+            <div className="text-sm space-y-1 font-mono">
+              {logs.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400">No logs yet...</p>
+              ) : (
+                logs.map((log, i) => (
+                  <div
+                    key={i}
+                    className="text-gray-700 dark:text-gray-300 fade-in"
+                  >
+                    {log}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <SupabaseDashboard />
+      )}
     </div>
   );
 }

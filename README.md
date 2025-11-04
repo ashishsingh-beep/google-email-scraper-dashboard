@@ -130,8 +130,11 @@ cd google-email-scraper-dashboard
 ### 2️⃣ Install Dependencies
 
 ```bash
-cd backend && npm install
-cd ../frontend && npm install
+cd backend
+npm install
+npm run playwright:install
+cd ../frontend
+npm install
 ```
 
 ### 3️⃣ Configure `.env`
@@ -213,57 +216,12 @@ Access your dashboard at 👉 [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🐳 Docker
+## � Local Tips
 
-Production-like run with Docker is included. This uses a Playwright base image so Chromium and dependencies are preinstalled.
-
-### One-time build and run
-
-```bash
-docker compose up --build
-```
-
-This will start:
-- Backend on http://localhost:5000
-- Frontend on http://localhost:5173 (served by Nginx)
-
-Notes:
-- The frontend talks to the backend at http://localhost:5000 (hardcoded in the UI). We map 5173:80 so the origin stays http://localhost:5173 and matches Socket.IO CORS defaults.
-- Backend reads secrets from backend/.env and they are baked into the image at build time. Edit `backend/.env` before building if you use Supabase or NopeCHA.
-- You can override concurrency defaults from the UI. Compose env vars are optional.
-
-### Useful compose commands
-
-```bash
-# Rebuild images after code changes
-docker compose build
-
-# Start in detached mode
-docker compose up -d
-
-# Stop and remove
-docker compose down
-
-### Publish to Docker Hub
-
-Two ways:
-
-1) With GitHub Actions (easiest, automated)
-     - Create two Docker Hub repositories (public is fine):
-         - ges-backend
-         - ges-frontend
-     - In your GitHub repo settings → Secrets and variables → Actions, add:
-         - DOCKERHUB_USERNAME: your Docker Hub username
-         - DOCKERHUB_TOKEN: a Docker Hub access token (Account Settings → Security → New Access Token)
-     - Push to main or trigger manually: Actions → “Publish Docker images” → Run workflow
-         - Images pushed to:
-             - docker.io/<username>/ges-backend:latest
-             - docker.io/<username>/ges-frontend:latest
-
-2) Manually from your machine (PowerShell)
-
-```powershell
-```
+- Run `npm run dev` inside both `backend/` and `frontend/` whenever you want to work on the project. Stop each with `Ctrl + C`.
+- The backend serves logs over Socket.IO. Keep that terminal open to continue receiving updates in the UI.
+- Playwright browsers are installed by `npm run playwright:install`. Re-run it if you update Playwright or switch machines.
+- If ports 5000 or 5173 are busy, stop other apps or export a different `PORT` for the backend and update the frontend `.env` proxy setting.
 
 ---
 
